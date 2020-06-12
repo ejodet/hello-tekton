@@ -204,7 +204,13 @@ spec:
           ibmcloud login -a $API -r $REGION;
           cd /workspace;
           export IKS_BETA_VERSION=1;
-          ibmcloud ks cluster config -c "${PIPELINE_KUBERNETES_CLUSTER_NAME}";
+          # ibmcloud ks cluster config -c "${PIPELINE_KUBERNETES_CLUSTER_NAME}";
+          PIPELINE_KUBERNETES_CLUSTER_ID=$( ibmcloud cs clusters --json | jq -r --arg region $region --arg clusterName $PIPELINE_KUBERNETES_CLUSTER_NAME '.[] | select((.region==$region) and (.name==$clusterName)) | .id' )
+          if [ "$PIPELINE_KUBERNETES_CLUSTER_ID" ]; then
+            ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_ID
+          else
+            ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME
+          fi
           if which oc > /dev/null && ibmcloud ks cluster get -c "${PIPELINE_KUBERNETES_CLUSTER_NAME}" --json | jq -e '.type=="openshift"' > /dev/null; then oc login -u apikey -p "${IBMCLOUD_API_KEY}" ; fi;
           while read line; do export $line; done < /artifacts/build.properties;
           cp /artifacts/build.properties .;
