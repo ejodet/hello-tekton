@@ -26,7 +26,7 @@ spec:
     mountPath: /artifacts   
   steps:
     - name: clone-repo
-      image: alpine/git
+      image: ibmcom/pipeline-base-image:latest
       env:
         - name: REPOSITORY
           value: $(params.repository)
